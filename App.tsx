@@ -13,55 +13,68 @@ const App: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Estado para controle de exclusão
   const [idsToDelete, setIdsToDelete] = useState<string[] | null>(null);
 
   useEffect(() => {
-    const loadedAccounts = storageService.getAccounts();
-    setAccounts(loadedAccounts);
+    const loadData = async () => {
+      setIsLoading(true);
+      const loadedAccounts = await storageService.getAccounts();
+      setAccounts(loadedAccounts);
+      setIsLoading(false);
+    };
+    loadData();
   }, []);
 
-  const handleSaveAccount = (data: AccountFormData) => {
+  const handleSaveAccount = async (data: AccountFormData) => {
+    setIsLoading(true);
     if (editingAccount) {
       const updated = { ...editingAccount, ...data };
-      storageService.updateAccount(updated);
+      await storageService.updateAccount(updated);
     } else {
       const newAccount: Account = {
         ...data,
         id: `acc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         createdAt: Date.now()
       };
-      storageService.addAccount(newAccount);
+      await storageService.addAccount(newAccount);
     }
-    setAccounts(storageService.getAccounts());
+    const refreshed = await storageService.getAccounts();
+    setAccounts(refreshed);
+    setIsLoading(false);
     setIsFormOpen(false);
     setEditingAccount(undefined);
   };
 
-  const confirmDeletion = () => {
+  const confirmDeletion = async () => {
     if (!idsToDelete) return;
 
-    // 1. Atualizar Storage
-    storageService.deleteAccounts(idsToDelete);
+    setIsLoading(true);
+    await storageService.deleteAccounts(idsToDelete);
 
-    // 2. Atualizar Estado Local
-    setAccounts(prev => prev.filter(acc => !idsToDelete.includes(acc.id)));
-
-    // 3. Limpar estado de exclusão
+    const refreshed = await storageService.getAccounts();
+    setAccounts(refreshed);
+    setIsLoading(false);
     setIdsToDelete(null);
   };
 
-  const handleUpdateStatus = (ids: string[], status: AccountStatus) => {
-    storageService.updateStatusBulk(ids, status);
-    setAccounts(storageService.getAccounts());
+  const handleUpdateStatus = async (ids: string[], status: AccountStatus) => {
+    setIsLoading(true);
+    await storageService.updateStatusBulk(ids, status);
+    const refreshed = await storageService.getAccounts();
+    setAccounts(refreshed);
+    setIsLoading(false);
   };
 
-  const handleImport = (imported: Account[]) => {
-    const current = storageService.getAccounts();
+  const handleImport = async (imported: Account[]) => {
+    setIsLoading(true);
+    const current = await storageService.getAccounts();
     const merged = [...current, ...imported];
-    storageService.saveAccounts(merged);
+    await storageService.saveAccounts(merged);
     setAccounts(merged);
+    setIsLoading(false);
   };
 
 
@@ -137,6 +150,16 @@ const App: React.FC = () => {
           />
         </div>
       </main>
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="text-blue-700 font-bold animate-pulse">Sincronizando...</p>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {idsToDelete && (
