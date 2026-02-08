@@ -69,55 +69,59 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
     <div className="space-y-6 mb-8">
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Pago</span>
-          <span className="text-2xl font-black text-emerald-600">R$ {stats.pago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Pago</span>
+          <span className="text-2xl font-black text-emerald-600 dark:text-emerald-500">R$ {stats.pago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg">{stats.countPago} títulos</span>
+            <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg">{stats.countPago} títulos</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Pendente</span>
-          <span className="text-2xl font-black text-amber-500">R$ {stats.pendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Pendente</span>
+          <span className="text-2xl font-black text-amber-500 dark:text-amber-400">R$ {stats.pendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] font-bold rounded-lg">{stats.countPendente} títulos</span>
+            <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold rounded-lg">{stats.countPendente} títulos</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Projeção Total</span>
-          <span className="text-2xl font-black text-slate-800">R$ {(stats.pago + stats.pendente).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Projeção Total</span>
+          <span className="text-2xl font-black text-slate-800 dark:text-slate-100">R$ {(stats.pago + stats.pendente).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-slate-50 text-slate-400 text-[10px] font-bold rounded-lg">{stats.countPago + stats.countPendente} ativos</span>
+            <span className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-[10px] font-bold rounded-lg">{stats.countPago + stats.countPendente} ativos</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Cancelados</span>
-          <span className="text-2xl font-black text-slate-400">{stats.countCancelado}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Cancelados</span>
+          <span className="text-2xl font-black text-slate-400 dark:text-slate-600">{stats.countCancelado}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-slate-50 text-slate-300 text-[10px] font-bold rounded-lg">Fora de fluxo</span>
+            <span className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 text-[10px] font-bold rounded-lg">Fora de fluxo</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Gráfico de Evolução Mensal */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 min-h-[350px]">
-          <h3 className="text-slate-800 font-bold mb-6 flex items-center gap-2">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 min-h-[350px]">
+          <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-6 flex items-center gap-2">
             <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
             Fluxo de Despesas (Mensal)
           </h3>
           <div className="h-64 mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b833" />
                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `R$${val / 1000}k`} />
                 <Tooltip
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                  contentStyle={{
+                    borderRadius: '16px',
+                    border: 'none',
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                  }}
                 />
                 <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
               </BarChart>
@@ -126,8 +130,8 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
         </div>
 
         {/* Gráfico de Categorias */}
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-          <h3 className="text-slate-800 font-bold mb-6 flex items-center gap-2">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800">
+          <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-6 flex items-center gap-2">
             <div className="w-1 h-4 bg-emerald-600 rounded-full"></div>
             Por Categoria
           </h3>
@@ -156,9 +160,9 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
               <div key={cat.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <span className="text-slate-600 font-medium">{cat.name}</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{cat.name}</span>
                 </div>
-                <span className="text-slate-900 font-bold">R$ {cat.value.toLocaleString('pt-BR')}</span>
+                <span className="text-slate-900 dark:text-slate-100 font-bold">R$ {cat.value.toLocaleString('pt-BR')}</span>
               </div>
             ))}
           </div>

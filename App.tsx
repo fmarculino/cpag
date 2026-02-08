@@ -1,24 +1,57 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Account, AccountStatus, AccountFormData } from './types';
+import { Account, AccountStatus, AccountFormData, User, UserRole, Theme } from './types';
 import { storageService } from './services/storage';
+import { authService } from './services/auth';
+import { userService } from './services/userService';
 import Dashboard from './components/Dashboard';
 import AccountList from './components/AccountList';
 import AccountForm from './components/AccountForm';
 import ImportModal from './components/ImportModal';
-import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X } from 'lucide-react';
+import Login from './components/Login';
+import UserManagement from './components/UserManagement';
+import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette } from 'lucide-react';
 
 const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(authService.getCurrentUser());
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isUserMgmtOpen, setIsUserMgmtOpen] = useState(false);
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
   // Estado para controle de exclusão
   const [idsToDelete, setIdsToDelete] = useState<string[] | null>(null);
 
+  // Theme effect
   useEffect(() => {
+    if (!currentUser) {
+      document.documentElement.classList.remove('dark');
+      return;
+    }
+
+    const applyTheme = (theme: Theme) => {
+      if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    applyTheme(currentUser.preferredTheme);
+
+    if (currentUser.preferredTheme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme('system');
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
     const loadData = async () => {
       setIsLoading(true);
       const loadedAccounts = await storageService.getAccounts();
@@ -26,7 +59,25 @@ const App: React.FC = () => {
       setIsLoading(false);
     };
     loadData();
-  }, []);
+  }, [currentUser]);
+
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setCurrentUser(null);
+  };
+
+  const handleUpdateTheme = async (theme: Theme) => {
+    if (!currentUser) return;
+    const updatedUser = { ...currentUser, preferredTheme: theme };
+    setCurrentUser(updatedUser);
+    authService.updateSession(updatedUser);
+    await userService.updatePreferredTheme(currentUser.id, theme);
+    setIsThemeMenuOpen(false);
+  };
 
   const handleSaveAccount = async (data: AccountFormData) => {
     setIsLoading(true);
@@ -78,32 +129,102 @@ const App: React.FC = () => {
   };
 
 
+  if (!currentUser) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-300">
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-white border-r border-slate-200 flex-shrink-0 z-20 sticky top-0 h-auto md:h-screen">
-        <div className="p-6">
+      <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 z-20 sticky top-0 h-auto md:h-screen">
+        <div className="p-6 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
               <PieIcon className="w-6 h-6" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-700 to-blue-500 dark:from-blue-400 dark:to-blue-600 bg-clip-text text-transparent">
               FinancePro
             </h1>
           </div>
 
-          <nav className="space-y-1">
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-semibold">
+          <nav className="space-y-1 flex-1">
+            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl font-semibold">
               <LayoutDashboard className="w-5 h-5" /> Dashboard
             </button>
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
               <List className="w-5 h-5" /> Movimentações
             </button>
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
+
+            {currentUser.role === UserRole.ADMIN && (
+              <button
+                type="button"
+                onClick={() => setIsUserMgmtOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors"
+              >
+                <Users className="w-5 h-5" /> Gestão de Usuários
+              </button>
+            )}
+
+            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
               <Settings className="w-5 h-5" /> Configurações
             </button>
           </nav>
 
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            {/* Theme Selector as per reference images */}
+            <div className="relative">
+              <button
+                onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                className="w-full flex items-center justify-between px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Palette className="w-5 h-5 text-slate-400" />
+                  <span className="font-medium text-sm">Tema</span>
+                </div>
+                <ChevronRight className={`w-4 h-4 transition-transform ${isThemeMenuOpen ? 'rotate-90' : ''}`} />
+              </button>
+
+              {isThemeMenuOpen && (
+                <div className="absolute bottom-full left-0 w-full mb-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+                  <button onClick={() => handleUpdateTheme('light')} className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${currentUser.preferredTheme === 'light' ? 'text-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'text-slate-600 dark:text-slate-400'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${currentUser.preferredTheme === 'light' ? 'border-blue-600' : 'border-slate-300 dark:border-slate-600'}`}>
+                      {currentUser.preferredTheme === 'light' && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                    </div>
+                    <Sun className="w-4 h-4" /> <span className="text-sm font-medium">Claro</span>
+                  </button>
+                  <button onClick={() => handleUpdateTheme('dark')} className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${currentUser.preferredTheme === 'dark' ? 'text-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'text-slate-600 dark:text-slate-400'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${currentUser.preferredTheme === 'dark' ? 'border-blue-600' : 'border-slate-300 dark:border-slate-600'}`}>
+                      {currentUser.preferredTheme === 'dark' && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                    </div>
+                    <Moon className="w-4 h-4" /> <span className="text-sm font-medium">Escuro</span>
+                  </button>
+                  <button onClick={() => handleUpdateTheme('system')} className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${currentUser.preferredTheme === 'system' ? 'text-blue-600 bg-blue-50/50 dark:bg-blue-900/10' : 'text-slate-600 dark:text-slate-400'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${currentUser.preferredTheme === 'system' ? 'border-blue-600' : 'border-slate-300 dark:border-slate-600'}`}>
+                      {currentUser.preferredTheme === 'system' && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                    </div>
+                    <Monitor className="w-4 h-4" /> <span className="text-sm font-medium">Sistema</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3 text-slate-500">
+              <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400">
+                <PieIcon className="w-4 h-4" />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{currentUser.fullName}</p>
+                <p className="text-[10px] text-slate-400 truncate">{currentUser.email}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors font-medium border border-transparent hover:border-red-100 dark:hover:border-red-900/20"
+            >
+              <LogOut className="w-5 h-5" /> Sair
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -111,17 +232,19 @@ const App: React.FC = () => {
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">Resumo Financeiro</h2>
-            <p className="text-slate-500 text-sm">Gerencie suas contas a pagar de forma inteligente e rápida.</p>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Resumo Financeiro</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Gerencie suas contas a pagar de forma inteligente e rápida.</p>
           </div>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setIsImportOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all shadow-sm"
-            >
-              <Download className="w-4 h-4" /> Importar
-            </button>
+            {currentUser?.role === UserRole.ADMIN && (
+              <button
+                type="button"
+                onClick={() => setIsImportOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+              >
+                <Download className="w-4 h-4" /> Importar
+              </button>
+            )}
             <button
               type="button"
               onClick={() => { setEditingAccount(undefined); setIsFormOpen(true); }}
@@ -137,8 +260,8 @@ const App: React.FC = () => {
 
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-slate-800">Relação de Contas</h3>
-            <span className="text-xs font-medium px-2 py-1 bg-slate-200 rounded text-slate-600 uppercase tracking-wider">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Relação de Contas</h3>
+            <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400 uppercase tracking-wider">
               {accounts.length} Registros
             </span>
           </div>
@@ -207,6 +330,12 @@ const App: React.FC = () => {
         <ImportModal
           onImport={handleImport}
           onClose={() => setIsImportOpen(false)}
+        />
+      )}
+
+      {isUserMgmtOpen && (
+        <UserManagement
+          onClose={() => setIsUserMgmtOpen(false)}
         />
       )}
     </div>

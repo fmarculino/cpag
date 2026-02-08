@@ -158,17 +158,17 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col transition-colors duration-300">
       {/* Table Header / Toolbar */}
-      <div className="p-4 border-b border-slate-100 space-y-4">
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-1 items-center gap-2">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Buscar fornecedor, título ou empresa..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -176,7 +176,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-sm font-medium ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-sm font-medium ${showFilters ? 'bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
             >
               <Filter className="w-4 h-4" />
               <span className="hidden sm:inline">Filtros</span>
@@ -189,7 +189,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
               type="button"
               onClick={handleExportPDF}
               disabled={filteredAccounts.length === 0}
-              className="flex items-center gap-2 px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50"
+              className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm disabled:opacity-50"
             >
               <FileText className="w-4 h-4 text-red-500" />
               <span className="hidden sm:inline">Exportar PDF</span>
@@ -198,18 +198,18 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
 
           {selectedIds.length > 0 && (
             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-              <span className="text-sm font-medium text-slate-600 mr-2">{selectedIds.length} selecionados</span>
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400 mr-2">{selectedIds.length} selecionados</span>
               <button
                 type="button"
                 onClick={handleBulkStatusUpdate}
-                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-sm hover:bg-emerald-100 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors font-bold"
               >
                 <CheckCircle className="w-4 h-4" /> Marcar Pago
               </button>
               <button
                 type="button"
                 onClick={handleBulkDelete}
-                className="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-bold"
               >
                 <Trash2 className="w-4 h-4" /> Excluir
               </button>
@@ -219,50 +219,50 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
 
         {/* Extended Date & Status Filters */}
         {showFilters && (
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in slide-in-from-top-4 duration-300">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-in slide-in-from-top-4 duration-300">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Campo de Data</label>
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Campo de Data</label>
               <select
                 value={dateFilterField}
                 onChange={(e) => setDateFilterField(e.target.value as any)}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
               >
                 <option value="vencimento">Vencimento</option>
                 <option value="dataMovimento">Movimento</option>
               </select>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Data Início</label>
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Data Início</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 />
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Data Fim</label>
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Data Fim</label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 />
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider ml-1">Status</label>
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Status</label>
               <div className="relative">
-                <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 >
                   <option value="ALL">Todos os Status</option>
                   <option value={AccountStatus.PENDENTE}>Pendente</option>
@@ -276,7 +276,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                 type="button"
                 onClick={clearAllFilters}
                 disabled={!startDate && !endDate && statusFilter === 'ALL'}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white text-slate-600 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors"
               >
                 <X className="w-4 h-4" /> Limpar Filtros
               </button>
@@ -288,63 +288,63 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
       <div className="overflow-x-auto flex-1">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50/50">
+            <tr className="bg-slate-50/50 dark:bg-slate-800/50">
               <th className="px-6 py-4 w-10">
                 <input
                   type="checkbox"
-                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   onChange={handleSelectAll}
                   checked={selectedIds.length === paginatedAccounts.length && paginatedAccounts.length > 0}
                 />
               </th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase cursor-pointer group" onClick={() => toggleSort('vencimento')}>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase cursor-pointer group" onClick={() => toggleSort('vencimento')}>
                 <div className="flex items-center gap-1">
                   Vencimento {sortField === 'vencimento' && (sortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                 </div>
               </th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase cursor-pointer" onClick={() => toggleSort('fornecedor')}>Fornecedor</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase cursor-pointer" onClick={() => toggleSort('titulo')}>Título</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase cursor-pointer text-right" onClick={() => toggleSort('valor')}>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase cursor-pointer" onClick={() => toggleSort('fornecedor')}>Fornecedor</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase cursor-pointer" onClick={() => toggleSort('titulo')}>Título</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase cursor-pointer text-right" onClick={() => toggleSort('valor')}>
                 <div className="flex items-center justify-end gap-1">
                   Valor {sortField === 'valor' && (sortOrder === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                 </div>
               </th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Status</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Alerta</th>
-              <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase text-right">Ações</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Status</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Alerta</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {paginatedAccounts.map((account) => {
               const isOverdue = account.status === AccountStatus.PENDENTE && account.vencimento < new Date().toISOString().split('T')[0];
               const isDueToday = account.status === AccountStatus.PENDENTE && account.vencimento === new Date().toISOString().split('T')[0];
 
               return (
-                <tr key={account.id} className={`hover:bg-slate-50/50 transition-colors ${selectedIds.includes(account.id) ? 'bg-blue-50/30' : ''} ${isOverdue ? 'bg-red-50/20' : ''} ${isDueToday ? 'bg-amber-50/20' : ''}`}>
+                <tr key={account.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(account.id) ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''} ${isOverdue ? 'bg-red-50/20 dark:bg-red-900/10' : ''} ${isDueToday ? 'bg-amber-50/20 dark:bg-amber-900/10' : ''}`}>
                   <td className="px-6 py-4">
                     <input
                       type="checkbox"
-                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      className="rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
                       checked={selectedIds.includes(account.id)}
                       onChange={() => handleSelectOne(account.id)}
                     />
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span>{new Date(account.vencimento).toLocaleDateString('pt-BR')}</span>
-                      <span className="text-[10px] text-slate-400">Mov: {new Date(account.dataMovimento).toLocaleDateString('pt-BR')}</span>
+                      <span className="font-medium text-slate-900 dark:text-slate-200">{new Date(account.vencimento).toLocaleDateString('pt-BR')}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-bold">Mov: {new Date(account.dataMovimento).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-slate-900">{account.fornecedor}</span>
-                      <span className="text-xs text-slate-400">{account.empresa}</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{account.fornecedor}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500 font-medium uppercase">{account.empresa}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-400">
                     {account.titulo}
                   </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-slate-900 whitespace-nowrap text-right">
+                  <td className="px-6 py-4 text-sm font-black text-slate-900 dark:text-slate-100 whitespace-nowrap text-right">
                     {account.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </td>
                   <td className="px-6 py-4">
@@ -356,17 +356,17 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                       const today = new Date().toISOString().split('T')[0];
                       if (account.vencimento < today) {
                         return (
-                          <div className="flex items-center gap-1 text-red-600 animate-pulse">
+                          <div className="flex items-center gap-1 text-red-600 dark:text-red-400 animate-pulse">
                             <AlertTriangle className="w-4 h-4" />
-                            <span className="text-[10px] font-bold uppercase">Atrasado</span>
+                            <span className="text-[10px] font-black uppercase tracking-tighter">Atrasado</span>
                           </div>
                         );
                       }
                       if (account.vencimento === today) {
                         return (
-                          <div className="flex items-center gap-1 text-amber-600">
+                          <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                             <AlertTriangle className="w-4 h-4" />
-                            <span className="text-[10px] font-bold uppercase">Hoje</span>
+                            <span className="text-[10px] font-black uppercase tracking-tighter">Hoje</span>
                           </div>
                         );
                       }
@@ -378,7 +378,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                       <button
                         type="button"
                         onClick={() => onEdit(account)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors shadow-sm border border-transparent hover:border-blue-100 dark:hover:border-slate-600"
                         title="Editar"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -386,7 +386,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                       <button
                         type="button"
                         onClick={(e) => handleIndividualDelete(e, account.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors shadow-sm border border-transparent hover:border-red-100 dark:hover:border-slate-600"
                         title="Excluir"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -398,10 +398,15 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
             })}
             {paginatedAccounts.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">
-                  {searchTerm || startDate || endDate || statusFilter !== 'ALL'
-                    ? "Nenhum registro encontrado para os filtros aplicados."
-                    : "Nenhum registro cadastrado."}
+                <td colSpan={8} className="px-6 py-12 text-center text-slate-400 dark:text-slate-600 italic">
+                  <div className="flex flex-col items-center gap-2">
+                    <Search className="w-8 h-8 opacity-20" />
+                    <p>
+                      {searchTerm || startDate || endDate || statusFilter !== 'ALL'
+                        ? "Nenhum registro encontrado para os filtros aplicados."
+                        : "Nenhum registro cadastrado."}
+                    </p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -411,16 +416,16 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
 
       {/* Pagination Footer */}
       {filteredAccounts.length > 0 && (
-        <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-slate-500">
-            Exibindo <span className="font-semibold text-slate-700">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> a <span className="font-semibold text-slate-700">{Math.min(currentPage * ITEMS_PER_PAGE, filteredAccounts.length)}</span> de <span className="font-semibold text-slate-700">{filteredAccounts.length}</span> registros
+        <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            Exibindo <span className="font-bold text-slate-700 dark:text-slate-200">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> a <span className="font-bold text-slate-700 dark:text-slate-200">{Math.min(currentPage * ITEMS_PER_PAGE, filteredAccounts.length)}</span> de <span className="font-bold text-slate-700 dark:text-slate-200">{filteredAccounts.length}</span> registros
           </div>
 
           <div className="flex items-center gap-1">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-transparent rounded-lg transition-all"
+              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent rounded-lg transition-all border border-transparent hover:border-blue-100 dark:hover:border-slate-600"
               title="Anterior"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -440,9 +445,9 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                   <button
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-semibold transition-all ${currentPage === pageNum
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'
+                    className={`min-w-[32px] h-8 px-2 rounded-lg text-sm font-black transition-all ${currentPage === pageNum
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-600'
                       }`}
                   >
                     {pageNum}
@@ -452,10 +457,10 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
 
               {totalPages > 5 && currentPage < totalPages - 2 && (
                 <>
-                  <span className="text-slate-300 mx-1">...</span>
+                  <span className="text-slate-300 dark:text-slate-600 mx-1">...</span>
                   <button
                     onClick={() => setCurrentPage(totalPages)}
-                    className="min-w-[32px] h-8 px-2 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-200 hover:text-slate-700"
+                    className="min-w-[32px] h-8 px-2 rounded-lg text-sm font-black text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
                   >
                     {totalPages}
                   </button>
@@ -466,7 +471,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 disabled:hover:bg-transparent rounded-lg transition-all"
+              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent rounded-lg transition-all border border-transparent hover:border-blue-100 dark:hover:border-slate-600"
               title="Próximo"
             >
               <ChevronRight className="w-5 h-5" />

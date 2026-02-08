@@ -109,20 +109,20 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800">Importar Dados</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Importar Dados</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
 
         <div className="p-8 space-y-6">
-          <div className="bg-blue-50 p-4 rounded-2xl flex gap-3 text-blue-700 text-sm border border-blue-100">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl flex gap-3 text-blue-700 dark:text-blue-300 text-sm border border-blue-100 dark:border-blue-800">
             <Info className="w-5 h-5 flex-shrink-0" />
             <div>
-              <p className="font-semibold mb-1">Formato suportado:</p>
+              <p className="font-bold mb-1">Formato suportado:</p>
               <p className="opacity-80 leading-tight">
                 Utilize o formato CSV delimitado por ponto e vírgula (;) seguindo o padrão da sua planilha Excel.
               </p>
@@ -136,22 +136,22 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
             </div>
           )}
 
-          <label className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all group ${file ? 'border-blue-400 bg-blue-50/30' : 'border-slate-200 hover:border-blue-400 hover:bg-blue-50/50'}`}>
+          <label className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all group ${file ? 'border-blue-400 bg-blue-50/30 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/5'}`}>
             <input type="file" accept=".csv,.txt" className="hidden" onChange={handleFileChange} />
-            <div className={`p-4 rounded-full transition-transform mb-4 ${file ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600 group-hover:scale-110'}`}>
+            <div className={`p-4 rounded-full transition-transform mb-4 ${file ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 group-hover:scale-110'}`}>
               <Upload className="w-8 h-8" />
             </div>
-            <span className="font-semibold text-slate-700 text-center">
+            <span className="font-bold text-slate-700 dark:text-slate-200 text-center">
               {file ? file.name : 'Selecionar Arquivo CSV'}
             </span>
-            <span className="text-sm text-slate-400 mt-1">Clique para buscar ou arraste o arquivo</span>
+            <span className="text-sm text-slate-400 dark:text-slate-500 mt-1">Clique para buscar ou arraste o arquivo</span>
           </label>
 
           <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-all"
+              className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
             >
               Cancelar
             </button>

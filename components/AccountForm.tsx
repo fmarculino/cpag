@@ -45,13 +45,13 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-          <h2 className="text-xl font-bold text-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
             {initialData ? 'Editar Conta' : 'Nova Conta'}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -59,51 +59,51 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Data Movimento</label>
-              <input type="date" name="dataMovimento" value={formData.dataMovimento} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Data Movimento</label>
+              <input type="date" name="dataMovimento" value={formData.dataMovimento} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Local (Cidade)</label>
-              <input type="text" name="local" value={formData.local} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Local (Cidade)</label>
+              <input type="text" name="local" value={formData.local} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Fornecedor</label>
-              <input type="text" name="fornecedor" value={formData.fornecedor} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Fornecedor</label>
+              <input type="text" name="fornecedor" value={formData.fornecedor} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Título / Nota</label>
-              <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Título / Nota</label>
+              <input type="text" name="titulo" value={formData.titulo} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Empresa</label>
-              <input type="text" name="empresa" value={formData.empresa} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Empresa</label>
+              <input type="text" name="empresa" value={formData.empresa} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Vencimento</label>
-              <input type="date" name="vencimento" value={formData.vencimento} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Vencimento</label>
+              <input type="date" name="vencimento" value={formData.vencimento} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Valor</label>
-              <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Valor</label>
+              <input type="number" step="0.01" name="valor" value={formData.valor} onChange={handleChange} required className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Conta Contábil</label>
-              <select name="tipo" value={formData.tipo} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Conta Contábil</label>
+              <select name="tipo" value={formData.tipo} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
                 <option value={AccountType.DESPESA}>Despesa</option>
                 <option value={AccountType.COMPRA}>Compra</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Categoria</label>
-              <select name="categoria" value={formData.categoria} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Categoria</label>
+              <select name="categoria" value={formData.categoria} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
                 {Object.values(AccountCategory).map(cat => (
                   <option key={cat} value={cat}>{cat.charAt(0) + cat.slice(1).toLowerCase()}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-              <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Status</label>
+              <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
                 <option value={AccountStatus.PENDENTE}>Pendente</option>
                 <option value={AccountStatus.PAGO}>Pago</option>
                 <option value={AccountStatus.CANCELADO}>Cancelado</option>
@@ -111,15 +111,15 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose 
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Observação</label>
-            <textarea name="observacao" value={formData.observacao} onChange={handleChange} rows={3} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none resize-none" />
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Observação</label>
+            <textarea name="observacao" value={formData.observacao} onChange={handleChange} rows={3} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none resize-none" />
           </div>
 
           <div className="pt-4 flex gap-3">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
               Cancelar
             </button>
-            <button type="submit" className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20">
+            <button type="submit" className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20">
               <Save className="w-5 h-5" />
               Salvar Conta
             </button>

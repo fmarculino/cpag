@@ -5,6 +5,26 @@ export enum AccountStatus {
   CANCELADO = 'CANCELADO'
 }
 
+export type Theme = 'light' | 'dark' | 'system';
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER'
+}
+
+export interface User {
+  id: string;
+  login: string;
+  fullName: string;
+  email: string;
+  password?: string; // Optinal because we don't want to send it to the client usually
+  role: UserRole;
+  preferredTheme: Theme;
+  createdAt: number;
+}
+
+export type UserFormData = Omit<User, 'id' | 'createdAt' | 'preferredTheme'> & { password: string };
+
 export enum AccountType {
   DESPESA = 'DESPESA',
   COMPRA = 'COMPRA'
