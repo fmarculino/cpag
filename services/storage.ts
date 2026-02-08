@@ -4,21 +4,37 @@ import { supabase } from './supabase';
 
 export const storageService = {
   getAccounts: async (): Promise<Account[]> => {
-    const { data, error } = await supabase
-      .from('accounts')
-      .select('*')
-      .order('vencimento', { ascending: true });
+    let allData: any[] = [];
+    let from = 0;
+    let to = 999;
+    let hasMore = true;
 
-    if (error) {
-      console.error('Error fetching accounts:', error);
-      return [];
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('accounts')
+        .select('*')
+        .range(from, to)
+        .order('vencimento', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching accounts:', error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        if (data.length < 1000) {
+          hasMore = false;
+        } else {
+          from += 1000;
+          to += 1000;
+        }
+      } else {
+        hasMore = false;
+      }
     }
 
-    // Adapt database snake_case to camelCase if necessary, 
-    // but the implementation plan SQL uses snake_case, 
-    // while the Account interface uses camelCase.
-    // I will map them here.
-    return (data || []).map(item => ({
+    return allData.map(item => ({
       id: item.id,
       dataMovimento: item.data_movimento,
       local: item.local,
