@@ -28,6 +28,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<AccountStatus | 'ALL'>('ALL');
   const [showFilters, setShowFilters] = useState(false);
+  const [hidePaid, setHidePaid] = useState(true);
 
   // Estado de Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +41,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
   // Resetar para página 1 quando filtros mudarem
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, startDate, endDate, statusFilter, dateFilterField]);
+  }, [searchTerm, startDate, endDate, statusFilter, dateFilterField, hidePaid]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
@@ -60,6 +61,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
     setStartDate('');
     setEndDate('');
     setStatusFilter('ALL');
+    setHidePaid(false);
   };
 
   const filteredAccounts = useMemo(() => {
@@ -70,7 +72,11 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
           a.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
           a.empresa.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesStatus = statusFilter === 'ALL' || a.status === statusFilter;
+        let matchesStatus = statusFilter === 'ALL' || a.status === statusFilter;
+
+        if (hidePaid && a.status === AccountStatus.PAGO) {
+          matchesStatus = false;
+        }
 
         const targetDate = a[dateFilterField];
         let matchesDate = true;
@@ -91,7 +97,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
         if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
         return 0;
       });
-  }, [accounts, searchTerm, statusFilter, dateFilterField, startDate, endDate, sortField, sortOrder]);
+  }, [accounts, searchTerm, statusFilter, dateFilterField, startDate, endDate, sortField, sortOrder, hidePaid]);
 
   // Lógica de Paginação
   const totalPages = Math.ceil(filteredAccounts.length / ITEMS_PER_PAGE);
@@ -194,6 +200,23 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
               <FileText className="w-4 h-4 text-red-500" />
               <span className="hidden sm:inline">Exportar PDF</span>
             </button>
+
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={hidePaid}
+                    onChange={(e) => setHidePaid(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 peer-checked:bg-red-500 peer-checked:border-red-500 transition-all flex items-center justify-center">
+                    <CheckCircle className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Oculta Pagas</span>
+              </label>
+            </div>
           </div>
 
           {selectedIds.length > 0 && (

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
@@ -63,7 +63,35 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
       return acc;
     }, [])
     .sort((a: any, b: any) => a.rawDate.getTime() - b.rawDate.getTime())
-    .slice(-6);
+    .sort((a: any, b: any) => a.rawDate.getTime() - b.rawDate.getTime());
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current && monthlyData.length > 0) {
+      const now = new Date();
+      const currentMonthLabel = `${now.toLocaleString('pt-BR', { month: 'short' })}/${now.getFullYear()}`;
+
+      const currentIndex = monthlyData.findIndex((item: any) => item.label === currentMonthLabel);
+
+      if (currentIndex !== -1) {
+        const barWidth = 100; // Largura estimada de cada barra + espaço
+        const containerWidth = scrollContainerRef.current.clientWidth;
+        const scrollPos = (currentIndex * barWidth) - (containerWidth / 2) + (barWidth / 2);
+
+        scrollContainerRef.current.scrollTo({
+          left: Math.max(0, scrollPos),
+          behavior: 'smooth'
+        });
+      } else {
+        // Se não encontrar o mês atual, rola para o final (mais recente)
+        scrollContainerRef.current.scrollTo({
+          left: scrollContainerRef.current.scrollWidth,
+          behavior: 'smooth'
+        });
+      }
+    }
+  }, [monthlyData]);
 
   return (
     <div className="space-y-6 mb-8">
@@ -109,23 +137,32 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
             <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
             Fluxo de Despesas (Mensal)
           </h3>
-          <div className="h-64 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b833" />
-                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `R$${val / 1000}k`} />
-                <Tooltip
-                  cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
-                  contentStyle={{
-                    borderRadius: '16px',
-                    border: 'none',
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                  }}
-                />
-                <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div
+            ref={scrollContainerRef}
+            className="h-64 mt-4 overflow-x-auto overflow-y-hidden pb-2"
+          >
+            <div style={{ minWidth: `${Math.max(100, monthlyData.length * 100)}px`, height: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b833" />
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `R$${val / 1000}k`} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                    contentStyle={{
+                      borderRadius: '16px',
+                      border: 'none',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                    }}
+                    formatter={(value: number) => [
+                      value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                      'Total'
+                    ]}
+                  />
+                  <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
