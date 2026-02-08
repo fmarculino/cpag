@@ -1,0 +1,7 @@
+{
+  "name": "FinancePro - Gestor de Contas a Pagar",
+  "description": "Uma plataforma moderna e responsiva para gestão financeira, permitindo controle total de contas, importação de dados e insights inteligentes via IA.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
