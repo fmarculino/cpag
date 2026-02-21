@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Account, AccountStatus, AccountFormData, User, UserRole, Theme } from './types';
+import { Account, AccountStatus, AccountFormData, User, UserRole, Theme, SystemSettings, AccountType, AccountCategory } from './types';
 import { storageService } from './services/storage';
+import { settingsService } from './services/settingsService';
 import { authService } from './services/auth';
 import { userService } from './services/userService';
 import Dashboard from './components/Dashboard';
@@ -10,14 +11,18 @@ import AccountForm from './components/AccountForm';
 import ImportModal from './components/ImportModal';
 import Login from './components/Login';
 import UserManagement from './components/UserManagement';
+import SettingsMenu from './components/SettingsMenu';
 import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getCurrentUser());
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isUserMgmtOpen, setIsUserMgmtOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | undefined>();
   const [isLoading, setIsLoading] = useState(true);
@@ -54,8 +59,12 @@ const App: React.FC = () => {
     if (!currentUser) return;
     const loadData = async () => {
       setIsLoading(true);
-      const loadedAccounts = await storageService.getAccounts();
+      const [loadedAccounts, loadedSettings] = await Promise.all([
+        storageService.getAccounts(),
+        settingsService.getSettings()
+      ]);
       setAccounts(loadedAccounts);
+      setSystemSettings(loadedSettings);
       setIsLoading(false);
     };
     loadData();
@@ -174,7 +183,10 @@ const App: React.FC = () => {
               </button>
             )}
 
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+            <button
+              type="button"
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
               <Settings className="w-5 h-5" /> Configurações
             </button>
           </nav>
@@ -271,15 +283,26 @@ const App: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Relação de Contas</h3>
             <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-              {accounts.length} Registros
+              {accounts.length} Total
             </span>
           </div>
-          <AccountList
-            accounts={accounts}
-            onEdit={(acc) => { setEditingAccount(acc); setIsFormOpen(true); }}
-            onDelete={(ids) => setIdsToDelete(ids)}
-            onUpdateStatus={handleUpdateStatus}
-          />
+
+          {systemSettings ? (
+            <AccountList
+              accounts={accounts}
+              systemSettings={systemSettings}
+              onEdit={account => {
+                setEditingAccount(account);
+                setIsFormOpen(true);
+              }}
+              onDelete={setIdsToDelete}
+              onUpdateStatus={handleUpdateStatus}
+            />
+          ) : (
+            <div className="flex items-center justify-center p-12 text-slate-400">
+              <div className="w-8 h-8 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -327,9 +350,10 @@ const App: React.FC = () => {
       )}
 
       {/* Modals */}
-      {isFormOpen && (
+      {isFormOpen && systemSettings && (
         <AccountForm
           initialData={editingAccount}
+          systemSettings={systemSettings}
           onSave={handleSaveAccount}
           onClose={() => { setIsFormOpen(false); setEditingAccount(undefined); }}
         />
@@ -345,6 +369,13 @@ const App: React.FC = () => {
       {isUserMgmtOpen && (
         <UserManagement
           onClose={() => setIsUserMgmtOpen(false)}
+        />
+      )}
+
+      {isSettingsOpen && (
+        <SettingsMenu
+          onClose={() => setIsSettingsOpen(false)}
+          onSettingsUpdated={setSystemSettings}
         />
       )}
     </div>

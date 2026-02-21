@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Account, AccountStatus, AccountType, AccountCategory, AccountFormData } from '../types';
+import { Account, AccountFormData, AccountStatus, AccountType, AccountCategory, SystemSettings } from '../types';
 import { X, Save, Layers, RefreshCw } from 'lucide-react';
 
 interface AccountFormProps {
   initialData?: Account;
+  systemSettings: SystemSettings;
   onSave: (data: AccountFormData | AccountFormData[]) => void;
   onClose: () => void;
 }
 
-const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose }) => {
+const AccountForm: React.FC<AccountFormProps> = ({ initialData, systemSettings, onSave, onClose }) => {
   const [formData, setFormData] = useState<AccountFormData>({
     dataMovimento: new Date().toISOString().split('T')[0],
     local: '',
@@ -17,9 +18,9 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose 
     empresa: '',
     vencimento: new Date().toISOString().split('T')[0],
     valor: 0,
-    tipo: AccountType.DESPESA,
-    categoria: AccountCategory.OUTROS,
-    status: AccountStatus.PENDENTE,
+    tipo: (systemSettings.accountTypes[0] as AccountType) || AccountType.DESPESA,
+    categoria: (systemSettings.accountCategories[0] as AccountCategory) || AccountCategory.OUTROS,
+    status: (systemSettings.accountStatuses[0] as AccountStatus) || AccountStatus.PENDENTE,
     observacao: ''
   });
 
@@ -163,14 +164,15 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose 
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Conta Contábil</label>
                     <select name="tipo" value={formData.tipo} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
-                      <option value={AccountType.DESPESA}>Despesa</option>
-                      <option value={AccountType.COMPRA}>Compra</option>
+                      {systemSettings.accountTypes.map(type => (
+                        <option key={type} value={type}>{type.charAt(0) + type.slice(1).toLowerCase()}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Categoria</label>
                     <select name="categoria" value={formData.categoria} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
-                      {Object.values(AccountCategory).map(cat => (
+                      {systemSettings.accountCategories.map(cat => (
                         <option key={cat} value={cat}>{cat.charAt(0) + cat.slice(1).toLowerCase()}</option>
                       ))}
                     </select>
@@ -178,9 +180,9 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, onSave, onClose 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Status</label>
                     <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none">
-                      <option value={AccountStatus.PENDENTE}>Pendente</option>
-                      <option value={AccountStatus.PAGO}>Pago</option>
-                      <option value={AccountStatus.CANCELADO}>Cancelado</option>
+                      {systemSettings.accountStatuses.map(status => (
+                        <option key={status} value={status}>{status.charAt(0) + status.slice(1).toLowerCase()}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="md:col-span-2">

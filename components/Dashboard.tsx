@@ -1,9 +1,10 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
+import { Eye, EyeOff } from 'lucide-react';
 import { Account, AccountStatus } from '../types';
 
 interface DashboardProps {
@@ -13,15 +14,24 @@ interface DashboardProps {
 const COLORS = ['#10b981', '#f59e0b', '#94a3b8']; // Green, Amber, Slate
 
 const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
+  const [showCharts, setShowCharts] = useState(() => {
+    const saved = localStorage.getItem('cpag_show_charts');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cpag_show_charts', JSON.stringify(showCharts));
+  }, [showCharts]);
+
   const stats = accounts.reduce((acc, curr) => {
     if (curr.status === AccountStatus.PAGO) {
       acc.pago += curr.valor;
       acc.countPago += 1;
-    } else if (curr.status === AccountStatus.PENDENTE) {
-      acc.pendente += curr.valor;
-      acc.countPendente += 1;
     } else if (curr.status === AccountStatus.CANCELADO) {
       acc.countCancelado += 1;
+    } else {
+      acc.pendente += curr.valor;
+      acc.countPendente += 1;
     }
     return acc;
   }, { pago: 0, pendente: 0, countPago: 0, countPendente: 0, countCancelado: 0 });
@@ -130,81 +140,96 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Gráfico de Evolução Mensal */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 min-h-[350px]">
-          <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-6 flex items-center gap-2">
-            <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
-            Fluxo de Despesas (Mensal)
-          </h3>
-          <div
-            ref={scrollContainerRef}
-            className="h-64 mt-4 overflow-x-auto overflow-y-hidden pb-2"
-          >
-            <div style={{ minWidth: `${Math.max(100, monthlyData.length * 100)}px`, height: '100%' }}>
+      <div className="flex items-center justify-end">
+        <button
+          onClick={() => setShowCharts(!showCharts)}
+          className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm"
+        >
+          {showCharts ? (
+            <><EyeOff className="w-4 h-4" /> Ocultar Gráficos</>
+          ) : (
+            <><Eye className="w-4 h-4" /> Exibir Gráficos</>
+          )}
+        </button>
+      </div>
+
+      {showCharts && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
+          {/* Gráfico de Evolução Mensal */}
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 min-h-[350px]">
+            <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-6 flex items-center gap-2">
+              <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
+              Fluxo de Despesas (Mensal)
+            </h3>
+            <div
+              ref={scrollContainerRef}
+              className="h-64 mt-4 overflow-x-auto overflow-y-hidden pb-2"
+            >
+              <div style={{ minWidth: `${Math.max(100, monthlyData.length * 100)}px`, height: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b833" />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `R$${val / 1000}k`} />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
+                      contentStyle={{
+                        borderRadius: '16px',
+                        border: 'none',
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                      }}
+                      formatter={(value: number) => [
+                        value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+                        'Total'
+                      ]}
+                    />
+                    <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Gráfico de Categorias */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800">
+            <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-6 flex items-center gap-2">
+              <div className="w-1 h-4 bg-emerald-600 rounded-full"></div>
+              Por Categoria
+            </h3>
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b833" />
-                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `R$${val / 1000}k`} />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }}
-                    contentStyle={{
-                      borderRadius: '16px',
-                      border: 'none',
-                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                    }}
-                    formatter={(value: number) => [
-                      value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-                      'Total'
-                    ]}
-                  />
-                  <Bar dataKey="total" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
-                </BarChart>
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {categoryData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
               </ResponsiveContainer>
+            </div>
+            <div className="mt-4 space-y-2">
+              {categoryData.slice(0, 3).map((cat: any, index: number) => (
+                <div key={cat.name} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                    <span className="text-slate-600 dark:text-slate-400 font-medium">{cat.name}</span>
+                  </div>
+                  <span className="text-slate-900 dark:text-slate-100 font-bold">R$ {cat.value.toLocaleString('pt-BR')}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Gráfico de Categorias */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800">
-          <h3 className="text-slate-800 dark:text-slate-100 font-bold mb-6 flex items-center gap-2">
-            <div className="w-1 h-4 bg-emerald-600 rounded-full"></div>
-            Por Categoria
-          </h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {categoryData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 space-y-2">
-            {categoryData.slice(0, 3).map((cat: any, index: number) => (
-              <div key={cat.name} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">{cat.name}</span>
-                </div>
-                <span className="text-slate-900 dark:text-slate-100 font-bold">R$ {cat.value.toLocaleString('pt-BR')}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

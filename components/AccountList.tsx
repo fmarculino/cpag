@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Account, AccountStatus } from '../types';
+import { Account, AccountStatus, SystemSettings } from '../types';
 import { reportService } from '../services/report';
 import {
   Edit2, Trash2, CheckCircle, Clock, Search, ChevronUp, ChevronDown,
@@ -9,6 +9,7 @@ import {
 
 interface AccountListProps {
   accounts: Account[];
+  systemSettings: SystemSettings;
   onEdit: (account: Account) => void;
   onDelete: (ids: string[]) => void;
   onUpdateStatus: (ids: string[], status: AccountStatus) => void;
@@ -16,7 +17,7 @@ interface AccountListProps {
 
 const ITEMS_PER_PAGE = 15;
 
-const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, onUpdateStatus }) => {
+const AccountList: React.FC<AccountListProps> = ({ accounts, systemSettings, onEdit, onDelete, onUpdateStatus }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof Account>('vencimento');
@@ -140,7 +141,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
     reportService.generateAccountReport(filteredAccounts);
   };
 
-  const getStatusBadge = (status: AccountStatus) => {
+  const getStatusBadge = (status: AccountStatus | string) => {
     switch (status) {
       case AccountStatus.PAGO:
         return (
@@ -155,9 +156,10 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
           </span>
         );
       default:
+        const displayStatus = status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : 'Pendente';
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-            <Clock className="w-3 h-3 mr-1" /> Pendente
+            <Clock className="w-3 h-3 mr-1" /> {displayStatus}
           </span>
         );
     }
@@ -288,9 +290,11 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                   className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                 >
                   <option value="ALL">Todos os Status</option>
-                  <option value={AccountStatus.PENDENTE}>Pendente</option>
-                  <option value={AccountStatus.PAGO}>Pago</option>
-                  <option value={AccountStatus.CANCELADO}>Cancelado</option>
+                  {systemSettings.accountStatuses.map(status => (
+                    <option key={status} value={status}>
+                      {status.charAt(0) + status.slice(1).toLowerCase()}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -339,8 +343,9 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {paginatedAccounts.map((account) => {
-              const isOverdue = account.status === AccountStatus.PENDENTE && account.vencimento < new Date().toISOString().split('T')[0];
-              const isDueToday = account.status === AccountStatus.PENDENTE && account.vencimento === new Date().toISOString().split('T')[0];
+              const isUnpaid = account.status !== AccountStatus.PAGO && account.status !== AccountStatus.CANCELADO;
+              const isOverdue = isUnpaid && account.vencimento < new Date().toISOString().split('T')[0];
+              const isDueToday = isUnpaid && account.vencimento === new Date().toISOString().split('T')[0];
 
               return (
                 <tr key={account.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(account.id) ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''} ${isOverdue ? 'bg-red-50/20 dark:bg-red-900/10' : ''} ${isDueToday ? 'bg-amber-50/20 dark:bg-amber-900/10' : ''}`}>
@@ -375,7 +380,8 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, onEdit, onDelete, o
                   </td>
                   <td className="px-6 py-4">
                     {(() => {
-                      if (account.status !== AccountStatus.PENDENTE) return null;
+                      const isUnpaid = account.status !== AccountStatus.PAGO && account.status !== AccountStatus.CANCELADO;
+                      if (!isUnpaid) return null;
                       const today = new Date().toISOString().split('T')[0];
                       if (account.vencimento < today) {
                         return (

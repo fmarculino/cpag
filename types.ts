@@ -68,3 +68,9 @@ export interface DashboardStats {
   countCancelado: number;
   totalGeral: number;
 }
+
+export interface SystemSettings {
+  accountTypes: string[];
+  accountCategories: string[];
+  accountStatuses: string[];
+}
