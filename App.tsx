@@ -79,18 +79,27 @@ const App: React.FC = () => {
     setIsThemeMenuOpen(false);
   };
 
-  const handleSaveAccount = async (data: AccountFormData) => {
+  const handleSaveAccount = async (data: AccountFormData | AccountFormData[]) => {
     setIsLoading(true);
-    if (editingAccount) {
-      const updated = { ...editingAccount, ...data };
-      await storageService.updateAccount(updated);
-    } else {
-      const newAccount: Account = {
-        ...data,
-        id: `acc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    if (Array.isArray(data)) {
+      const newAccounts: Account[] = data.map((item, index) => ({
+        ...item,
+        id: `acc-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
         createdAt: Date.now()
-      };
-      await storageService.addAccount(newAccount);
+      }));
+      await storageService.addAccounts(newAccounts);
+    } else {
+      if (editingAccount) {
+        const updated = { ...editingAccount, ...data };
+        await storageService.updateAccount(updated);
+      } else {
+        const newAccount: Account = {
+          ...data,
+          id: `acc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          createdAt: Date.now()
+        };
+        await storageService.addAccount(newAccount);
+      }
     }
     const refreshed = await storageService.getAccounts();
     setAccounts(refreshed);

@@ -100,6 +100,30 @@ export const storageService = {
     if (error) console.error('Error adding account:', error);
   },
 
+  addAccounts: async (accounts: Account[]): Promise<void> => {
+    const dbItems = accounts.map(account => ({
+      id: account.id,
+      data_movimento: account.dataMovimento,
+      local: account.local,
+      fornecedor: account.fornecedor,
+      titulo: account.titulo,
+      empresa: account.empresa,
+      vencimento: account.vencimento,
+      valor: account.valor,
+      tipo: account.tipo,
+      categoria: account.categoria,
+      status: account.status,
+      observacao: account.observacao,
+      created_at: account.createdAt
+    }));
+
+    const { error } = await supabase
+      .from('accounts')
+      .insert(dbItems);
+
+    if (error) console.error('Error adding accounts in bulk:', error);
+  },
+
   updateAccount: async (updatedAccount: Account): Promise<void> => {
     const { error } = await supabase
       .from('accounts')
