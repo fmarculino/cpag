@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Account, AccountFormData, AccountStatus, AccountType, AccountCategory, SystemSettings } from '../types';
-import { X, Save, Layers, RefreshCw } from 'lucide-react';
+import { Account, AccountFormData, AccountStatus, AccountType, AccountCategory, SystemSettings, Attachment } from '../types';
+import { X, Save, Layers, RefreshCw, Paperclip, Trash2, FileText, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { fileService } from '../services/fileService';
 
 interface AccountFormProps {
   initialData?: Account;
@@ -21,7 +22,8 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, systemSettings, 
     tipo: (systemSettings.accountTypes[0] as AccountType) || AccountType.DESPESA,
     categoria: (systemSettings.accountCategories[0] as AccountCategory) || AccountCategory.OUTROS,
     status: (systemSettings.accountStatuses[0] as AccountStatus) || AccountStatus.PENDENTE,
-    observacao: ''
+    observacao: '',
+    anexos: []
   });
 
   // Multiple Installments State
@@ -30,6 +32,8 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, systemSettings, 
   const [intervalDays, setIntervalDays] = useState<number>(30);
   const [valueType, setValueType] = useState<'TOTAL' | 'UNIT'>('TOTAL');
   const [previewInstallments, setPreviewInstallments] = useState<AccountFormData[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -114,6 +118,63 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, systemSettings, 
     });
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []) as File[];
+    if (files.length === 0) return;
+
+    setUploadError(null);
+    const validFiles: File[] = [];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    for (const file of files) {
+      if (!['image/jpeg', 'application/pdf'].includes(file.type)) {
+        setUploadError('Apenas arquivos JPG e PDF são permitidos.');
+        return;
+      }
+      if (file.size > maxSize) {
+        setUploadError(`Arquivo ${file.name} excede o limite de 5MB.`);
+        return;
+      }
+      validFiles.push(file);
+    }
+
+    try {
+      setIsUploading(true);
+      const newAttachments = await fileService.uploadFiles(validFiles);
+      setFormData(prev => ({
+        ...prev,
+        anexos: [...(prev.anexos || []), ...newAttachments]
+      }));
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError('Erro ao fazer upload dos arquivos. Tente novamente.');
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
+  const removeAttachment = async (index: number) => {
+    const attachmentToRemove = formData.anexos?.[index];
+    if (!attachmentToRemove) return;
+
+    try {
+      await fileService.deleteFile(attachmentToRemove.path);
+      setFormData(prev => ({
+        ...prev,
+        anexos: prev.anexos?.filter((_, i) => i !== index)
+      }));
+    } catch (error) {
+      console.error('Error removing attachment:', error);
+      // Still remove from UI even if delete fails on server (or show error)
+      setFormData(prev => ({
+        ...prev,
+        anexos: prev.anexos?.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800 flex flex-col max-h-[90vh]">
@@ -188,6 +249,52 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, systemSettings, 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Observação</label>
                     <textarea name="observacao" value={formData.observacao} onChange={handleChange} rows={2} className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:outline-none resize-none" />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
+                      <Paperclip className="w-4 h-4" /> Anexos (Notas, Boletos, Comprovantes)
+                    </label>
+                    <div className="mt-2 space-y-3">
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors border border-dashed border-blue-200 dark:border-blue-800 font-medium text-sm">
+                          <Paperclip className="w-4 h-4" />
+                          <span>Selecionar Arquivos</span>
+                          <input type="file" multiple accept=".jpg,.jpeg,.pdf" onChange={handleFileChange} className="hidden" disabled={isUploading} />
+                        </label>
+                        {isUploading && (
+                          <div className="flex items-center gap-2 text-slate-500 text-sm">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Enviando...</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {uploadError && <p className="text-red-500 text-xs font-medium">{uploadError}</p>}
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">JPG ou PDF, máx. 5MB por arquivo.</p>
+
+                      {formData.anexos && formData.anexos.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                          {formData.anexos.map((file, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 group hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                {file.type.includes('image') ? (
+                                  <ImageIcon className="w-4 h-4 flex-shrink-0 text-amber-500" />
+                                ) : (
+                                  <FileText className="w-4 h-4 flex-shrink-0 text-red-500" />
+                                )}
+                                <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-xs text-slate-600 dark:text-slate-400 truncate hover:text-blue-600 dark:hover:text-blue-400 font-medium">
+                                  {file.name}
+                                </a>
+                              </div>
+                              <button type="button" onClick={() => removeAttachment(idx)} className="p-1.5 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

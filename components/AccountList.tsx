@@ -4,7 +4,7 @@ import { Account, AccountStatus, SystemSettings } from '../types';
 import { reportService } from '../services/report';
 import {
   Edit2, Trash2, CheckCircle, Clock, Search, ChevronUp, ChevronDown,
-  Calendar, Filter, X, XCircle, ListFilter, FileText, ChevronLeft, ChevronRight, AlertTriangle
+  Calendar, Filter, X, XCircle, ListFilter, FileText, ChevronLeft, ChevronRight, AlertTriangle, Paperclip
 } from 'lucide-react';
 
 interface AccountListProps {
@@ -338,6 +338,7 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, systemSettings, onE
               </th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Status</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Alerta</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase text-center"><Paperclip className="w-4 h-4 mx-auto" /></th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase text-right">Ações</th>
             </tr>
           </thead>
@@ -401,6 +402,13 @@ const AccountList: React.FC<AccountListProps> = ({ accounts, systemSettings, onE
                       }
                       return null;
                     })()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {account.anexos && account.anexos.length > 0 && (
+                      <div className="flex items-center justify-center">
+                        <Paperclip className="w-4 h-4 text-blue-500" title={`${account.anexos.length} anexo(s)`} />
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">

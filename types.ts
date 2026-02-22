@@ -42,6 +42,14 @@ export enum AccountCategory {
   SOFTWARE = 'SOFTWARE'
 }
 
+export interface Attachment {
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  path: string;
+}
+
 export interface Account {
   id: string;
   dataMovimento: string;
@@ -56,6 +64,7 @@ export interface Account {
   status: AccountStatus;
   observacao: string;
   createdAt: number;
+  anexos?: Attachment[];
 }
 
 export type AccountFormData = Omit<Account, 'id' | 'createdAt'>;

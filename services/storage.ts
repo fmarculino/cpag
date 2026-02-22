@@ -47,7 +47,8 @@ export const storageService = {
       categoria: item.categoria,
       status: item.status,
       observacao: item.observacao,
-      createdAt: item.created_at
+      createdAt: item.created_at,
+      anexos: item.anexos || []
     }));
   },
 
@@ -68,7 +69,8 @@ export const storageService = {
       categoria: a.categoria,
       status: a.status,
       observacao: a.observacao,
-      created_at: a.createdAt
+      created_at: a.createdAt,
+      anexos: a.anexos
     }));
 
     const { error } = await supabase
@@ -94,7 +96,8 @@ export const storageService = {
         categoria: account.categoria,
         status: account.status,
         observacao: account.observacao,
-        created_at: account.createdAt
+        created_at: account.createdAt,
+        anexos: account.anexos
       }]);
 
     if (error) console.error('Error adding account:', error);
@@ -114,7 +117,8 @@ export const storageService = {
       categoria: account.categoria,
       status: account.status,
       observacao: account.observacao,
-      created_at: account.createdAt
+      created_at: account.createdAt,
+      anexos: account.anexos
     }));
 
     const { error } = await supabase
@@ -139,6 +143,7 @@ export const storageService = {
         categoria: updatedAccount.categoria,
         status: updatedAccount.status,
         observacao: updatedAccount.observacao,
+        anexos: updatedAccount.anexos,
       })
       .eq('id', updatedAccount.id);
 
