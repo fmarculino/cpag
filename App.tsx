@@ -13,6 +13,8 @@ import Login from './components/Login';
 import UserManagement from './components/UserManagement';
 import SettingsMenu from './components/SettingsMenu';
 import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette } from 'lucide-react';
+import { Analytics } from "@vercel/analytics/react"
+
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(authService.getCurrentUser());
@@ -378,7 +380,9 @@ const App: React.FC = () => {
           onSettingsUpdated={setSystemSettings}
         />
       )}
+      <Analytics />
     </div>
+
   );
 };
 
