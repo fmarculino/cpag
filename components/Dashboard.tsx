@@ -107,35 +107,35 @@ const Dashboard: React.FC<DashboardProps> = ({ accounts }) => {
     <div className="space-y-6 mb-8">
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
-          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Pago</span>
-          <span className="text-2xl font-black text-emerald-600 dark:text-emerald-500">R$ {stats.pago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">Total Pago</span>
+          <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-500">R$ {stats.pago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg">{stats.countPago} títulos</span>
+            <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[9px] sm:text-[10px] font-bold rounded-lg">{stats.countPago} títulos</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
-          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Pendente</span>
-          <span className="text-2xl font-black text-amber-500 dark:text-amber-400">R$ {stats.pendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">Total Pendente</span>
+          <span className="text-xl sm:text-2xl font-black text-amber-500 dark:text-amber-400">R$ {stats.pendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[10px] font-bold rounded-lg">{stats.countPendente} títulos</span>
+            <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 text-[9px] sm:text-[10px] font-bold rounded-lg">{stats.countPendente} títulos</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
-          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Projeção Total</span>
-          <span className="text-2xl font-black text-slate-800 dark:text-slate-100">R$ {(stats.pago + stats.pendente).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">Projeção Total</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">R$ {(stats.pago + stats.pendente).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-[10px] font-bold rounded-lg">{stats.countPago + stats.countPendente} ativos</span>
+            <span className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-[9px] sm:text-[10px] font-bold rounded-lg">{stats.countPago + stats.countPendente} ativos</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
-          <span className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Cancelados</span>
-          <span className="text-2xl font-black text-slate-400 dark:text-slate-600">{stats.countCancelado}</span>
+        <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col">
+          <span className="text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">Cancelados</span>
+          <span className="text-xl sm:text-2xl font-black text-slate-400 dark:text-slate-600">{stats.countCancelado}</span>
           <div className="mt-2 flex items-center gap-2">
-            <span className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 text-[10px] font-bold rounded-lg">Fora de fluxo</span>
+            <span className="px-2 py-0.5 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 text-[9px] sm:text-[10px] font-bold rounded-lg">Fora de fluxo</span>
           </div>
         </div>
       </div>

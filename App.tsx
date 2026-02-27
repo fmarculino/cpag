@@ -12,7 +12,7 @@ import ImportModal from './components/ImportModal';
 import Login from './components/Login';
 import UserManagement from './components/UserManagement';
 import SettingsMenu from './components/SettingsMenu';
-import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette } from 'lucide-react';
+import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette, Menu } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 
 
@@ -31,6 +31,9 @@ const App: React.FC = () => {
 
   // Estado para controle de exclusão
   const [idsToDelete, setIdsToDelete] = useState<string[] | null>(null);
+
+  // Estado para sidebar mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Theme effect
   useEffect(() => {
@@ -155,10 +158,28 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col md:flex-row transition-colors duration-300">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+            <PieIcon className="w-5 h-5" />
+          </div>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-700 to-blue-500 dark:from-blue-400 dark:to-blue-600 bg-clip-text text-transparent">
+            FinancePro
+          </h1>
+        </div>
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+        >
+          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 z-20 sticky top-0 h-auto md:h-screen">
+      <aside className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 z-40 transition-transform duration-300 ease-in-out md:translate-x-0 md:static ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 flex flex-col h-full">
-          <div className="flex items-center gap-2 mb-8">
+          <div className="hidden md:flex items-center gap-2 mb-8">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
               <PieIcon className="w-6 h-6" />
             </div>
@@ -250,6 +271,14 @@ const App: React.FC = () => {
           </div>
         </div>
       </aside>
+
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8">

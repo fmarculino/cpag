@@ -372,13 +372,13 @@ const AccountForm: React.FC<AccountFormProps> = ({ initialData, systemSettings, 
           </form>
         </div>
 
-        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex gap-3 flex-shrink-0">
+        <div className="p-4 sm:p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-col sm:flex-row gap-3 flex-shrink-0">
           <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
             Cancelar
           </button>
           <button type="submit" form="accountForm" disabled={isMultiple && previewInstallments.length === 0} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
             <Save className="w-5 h-5" />
-            {isMultiple && previewInstallments.length > 0 ? `Salvar ${previewInstallments.length} Parcelas` : 'Salvar Conta'}
+            <span className="truncate">{isMultiple && previewInstallments.length > 0 ? `Salvar ${previewInstallments.length} Parcela(s)` : 'Salvar Conta'}</span>
           </button>
         </div>
       </div>
