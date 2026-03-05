@@ -119,13 +119,34 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
         </div>
 
         <div className="p-8 space-y-6">
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl flex gap-3 text-blue-700 dark:text-blue-300 text-sm border border-blue-100 dark:border-blue-800">
-            <Info className="w-5 h-5 flex-shrink-0" />
-            <div>
-              <p className="font-bold mb-1">Formato suportado:</p>
-              <p className="opacity-80 leading-tight">
-                Utilize o formato CSV delimitado por ponto e vírgula (;) seguindo o padrão da sua planilha Excel.
-              </p>
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-2xl flex flex-col gap-3 text-blue-700 dark:text-blue-300 text-sm border border-blue-100 dark:border-blue-800">
+            <div className="flex gap-3">
+              <Info className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <p className="font-bold mb-1">Formato suportado:</p>
+                <p className="opacity-80 leading-tight">
+                  Utilize o formato CSV delimitado por ponto e vírgula (;) seguindo a ordem exata das colunas abaixo:
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 pt-3 border-t border-blue-100 dark:border-blue-800/50">
+              <div className="flex flex-col">
+                <span className="font-semibold text-xs opacity-60 uppercase tracking-wider">Coluna / Formato</span>
+                <span className="mt-1">1. <b>Data Mov.</b>: DD/MM/AAAA</span>
+                <span>2. <b>Local</b>: texto</span>
+                <span>3. <b>Fornecedor</b>: texto</span>
+                <span>4. <b>Título</b>: texto</span>
+                <span>5. <b>Empresa</b>: texto</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-semibold text-xs opacity-60 uppercase tracking-wider">&nbsp;</span>
+                <span className="mt-1">6. <b>Vencimento</b>: DD/MM/AAAA</span>
+                <span>7. <b>Valor</b>: R$ 0,00</span>
+                <span>8. <b>Tipo</b>: COMPRA / DESPESA</span>
+                <span>9. <b>Status</b>: PAGO / PENDENTE</span>
+                <span>10. <b>Obs.</b>: texto</span>
+              </div>
             </div>
           </div>
 
