@@ -12,20 +12,16 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM nginx:alpine
+FROM nginx:stable-alpine
 
 # Copy build output to Nginx public directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy custom Nginx config for SPA routing (optional but recommended)
-RUN echo "server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html index.htm; \
-        try_files \$uri \$uri/ /index.html; \
-    } \
-}" > /etc/nginx/conf.d/default.conf
+# Copy the modern nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Fix permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
 
 EXPOSE 80
 
