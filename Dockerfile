@@ -23,6 +23,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Fix permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 3000
 
 CMD ["nginx", "-g", "daemon off;"]
