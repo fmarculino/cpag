@@ -30,7 +30,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ onClose }) => {
                 </h2>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="px-2.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-200/50 dark:border-blue-800/50">
-                    Versão 0.0.1-beta
+                    Versão 0.0.2-beta
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Produção VPS</span>
