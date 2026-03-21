@@ -12,7 +12,8 @@ import ImportModal from './components/ImportModal';
 import Login from './components/Login';
 import UserManagement from './components/UserManagement';
 import SettingsMenu from './components/SettingsMenu';
-import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette, Menu } from 'lucide-react';
+import HelpModal from './components/HelpModal';
+import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette, Menu, HelpCircle } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 
 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isUserMgmtOpen, setIsUserMgmtOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | undefined>();
   const [isLoading, setIsLoading] = useState(true);
@@ -211,6 +213,13 @@ const App: React.FC = () => {
               onClick={() => setIsSettingsOpen(true)}
               className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
               <Settings className="w-5 h-5" /> Configurações
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsHelpOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+              <HelpCircle className="w-5 h-5" /> Ajuda
             </button>
           </nav>
 
@@ -407,6 +416,12 @@ const App: React.FC = () => {
         <SettingsMenu
           onClose={() => setIsSettingsOpen(false)}
           onSettingsUpdated={setSystemSettings}
+        />
+      )}
+
+      {isHelpOpen && (
+        <HelpModal
+          onClose={() => setIsHelpOpen(false)}
         />
       )}
       <Analytics />
