@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.env
+.env.local
+.vscode
+.agent
+*.md
+Dockerfile
+.dockerignore
+package-lock.json
