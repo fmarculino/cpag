@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Account, AccountStatus, AccountFormData, User, UserRole, Theme, SystemSettings, AccountType, AccountCategory } from './types';
 import { storageService } from './services/storage';
 import { settingsService } from './services/settingsService';
@@ -10,10 +10,10 @@ import AccountList from './components/AccountList';
 import AccountForm from './components/AccountForm';
 import ImportModal from './components/ImportModal';
 import Login from './components/Login';
-import UserManagement from './components/UserManagement';
-import SettingsMenu from './components/SettingsMenu';
+import UserManagement, { UserManagementRef } from './components/UserManagement';
+import AppSettingsView from './components/AppSettingsView';
 import HelpModal from './components/HelpModal';
-import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette, Menu, HelpCircle } from 'lucide-react';
+import { Plus, Download, Sparkles, LayoutDashboard, List, PieChart as PieIcon, Settings, Trash2, AlertTriangle, X, LogOut, Users, Sun, Moon, Monitor, ChevronRight, Palette, Menu, HelpCircle, UserPlus, Save } from 'lucide-react';
 import { Analytics } from "@vercel/analytics/react"
 
 
@@ -24,18 +24,18 @@ const App: React.FC = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [isUserMgmtOpen, setIsUserMgmtOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+  const userMgmtRef = useRef<UserManagementRef>(null);
 
   // Estado para controle de exclusão
   const [idsToDelete, setIdsToDelete] = useState<string[] | null>(null);
 
   // Estado para sidebar mobile
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeView, setActiveView] = useState<'dashboard' | 'transactions' | 'users' | 'settings'>('dashboard');
 
   // Theme effect
   useEffect(() => {
@@ -191,18 +191,26 @@ const App: React.FC = () => {
           </div>
 
           <nav className="space-y-1 flex-1">
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl font-semibold">
+            <button
+              type="button"
+              onClick={() => { setActiveView('dashboard'); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${activeView === 'dashboard' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+            >
               <LayoutDashboard className="w-5 h-5" /> Dashboard
             </button>
-            <button type="button" className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+            <button
+              type="button"
+              onClick={() => { setActiveView('transactions'); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${activeView === 'transactions' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+            >
               <List className="w-5 h-5" /> Movimentações
             </button>
 
             {currentUser.role === UserRole.ADMIN && (
               <button
                 type="button"
-                onClick={() => setIsUserMgmtOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors"
+                onClick={() => { setActiveView('users'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${activeView === 'users' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
               >
                 <Users className="w-5 h-5" /> Gestão de Usuários
               </button>
@@ -210,8 +218,9 @@ const App: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => setIsSettingsOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+              onClick={() => { setActiveView('settings'); setIsSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-colors ${activeView === 'settings' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
+            >
               <Settings className="w-5 h-5" /> Configurações
             </button>
 
@@ -293,57 +302,86 @@ const App: React.FC = () => {
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Resumo Financeiro</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Gerencie suas contas a pagar de forma inteligente e rápida.</p>
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              {activeView === 'dashboard' ? 'Resumo Financeiro' : activeView === 'transactions' ? 'Movimentações' : activeView === 'users' ? 'Gestão de Usuários' : 'Configurações do Sistema'}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              {activeView === 'dashboard'
+                ? 'Gerencie suas contas a pagar de forma inteligente e rápida.'
+                : activeView === 'transactions'
+                ? 'Visualize e gerencie todas as suas movimentações financeiras.'
+                : activeView === 'users'
+                ? 'Gerencie os usuários e permissões de acesso ao sistema.'
+                : 'Personalize o sistema com categorias, tipos e status customizados.'}
+            </p>
           </div>
-          <div className="flex gap-3">
-            {currentUser?.role === UserRole.ADMIN && (
+          {activeView === 'transactions' && (
+            <div className="flex gap-3">
+              {currentUser?.role === UserRole.ADMIN && (
+                <button
+                  type="button"
+                  onClick={() => setIsImportOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                >
+                  <Download className="w-4 h-4" /> Importar
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setIsImportOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                onClick={() => { setEditingAccount(undefined); setIsFormOpen(true); }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25"
               >
-                <Download className="w-4 h-4" /> Importar
+                <Plus className="w-5 h-5" /> Nova Conta
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => { setEditingAccount(undefined); setIsFormOpen(true); }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25"
-            >
-              <Plus className="w-5 h-5" /> Nova Conta
-            </button>
-          </div>
+            </div>
+          )}
+          {activeView === 'users' && (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => userMgmtRef.current?.handleOpenModal()}
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25"
+              >
+                <UserPlus className="w-5 h-5" /> Novo Usuário
+              </button>
+            </div>
+          )}
         </header>
 
 
-        <Dashboard accounts={accounts} />
+          {activeView === 'dashboard' ? (
+            <Dashboard accounts={accounts} />
+          ) : activeView === 'transactions' ? (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Relação de Contas</h3>
+                <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                  {accounts.length} Total
+                </span>
+              </div>
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Relação de Contas</h3>
-            <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-              {accounts.length} Total
-            </span>
-          </div>
-
-          {systemSettings ? (
-            <AccountList
-              accounts={accounts}
-              systemSettings={systemSettings}
-              onEdit={account => {
-                setEditingAccount(account);
-                setIsFormOpen(true);
-              }}
-              onDelete={setIdsToDelete}
-              onUpdateStatus={handleUpdateStatus}
-            />
-          ) : (
-            <div className="flex items-center justify-center p-12 text-slate-400">
-              <div className="w-8 h-8 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+              {systemSettings ? (
+                <AccountList
+                  accounts={accounts}
+                  systemSettings={systemSettings}
+                  onEdit={account => {
+                    setEditingAccount(account);
+                    setIsFormOpen(true);
+                  }}
+                  onDelete={setIdsToDelete}
+                  onUpdateStatus={handleUpdateStatus}
+                />
+              ) : (
+                <div className="flex items-center justify-center p-12 text-slate-400">
+                  <div className="w-8 h-8 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
+          ) : activeView === 'users' ? (
+            <UserManagement ref={userMgmtRef} />
+          ) : (
+            <AppSettingsView onUpdate={setSystemSettings} />
           )}
-        </div>
       </main>
 
       {/* Loading Overlay */}
@@ -403,19 +441,6 @@ const App: React.FC = () => {
         <ImportModal
           onImport={handleImport}
           onClose={() => setIsImportOpen(false)}
-        />
-      )}
-
-      {isUserMgmtOpen && (
-        <UserManagement
-          onClose={() => setIsUserMgmtOpen(false)}
-        />
-      )}
-
-      {isSettingsOpen && (
-        <SettingsMenu
-          onClose={() => setIsSettingsOpen(false)}
-          onSettingsUpdated={setSystemSettings}
         />
       )}
 

@@ -166,5 +166,14 @@ export const storageService = {
       .in('id', ids);
 
     if (error) console.error('Error updating status:', error);
+  },
+
+  renameValue: async (column: 'tipo' | 'categoria' | 'status', oldValue: string, newValue: string): Promise<void> => {
+    const { error } = await supabase
+      .from('accounts')
+      .update({ [column]: newValue })
+      .eq(column, oldValue);
+
+    if (error) console.error(`Error renaming ${column} from ${oldValue} to ${newValue}:`, error);
   }
 };

@@ -79,6 +79,11 @@ export interface DashboardStats {
 }
 
 export interface SystemSettings {
+  companyName: string;
+  currencySymbol: string;
+  dateFormat: string;
+  logoUrl?: string;
+  theme: Theme;
   accountTypes: string[];
   accountCategories: string[];
   accountStatuses: string[];

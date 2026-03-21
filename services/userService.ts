@@ -26,6 +26,20 @@ export const userService = {
         }));
     },
 
+    getUsersForBackup: async (): Promise<any[]> => {
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching users for backup:', error);
+            return [];
+        }
+
+        return data;
+    },
+
     createUser: async (data: UserFormData): Promise<{ success: boolean; error?: string }> => {
         // Validate password pattern
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -149,5 +163,27 @@ export const userService = {
         }
 
         return { success: true };
+    },
+
+    restoreUsers: async (users: any[]): Promise<void> => {
+        // Upsert all users into the DB
+        const { error } = await supabase
+            .from('users')
+            .upsert(users);
+
+        if (error) {
+            console.error('Error restoring users:', error);
+            throw new Error(error.message);
+        }
+    },
+
+    clearAllUsers: async (): Promise<void> => {
+        // Delete all users (DANGER!)
+        const { error } = await supabase
+            .from('users')
+            .delete()
+            .neq('id', 'admin'); // Keep at least one admin if you can 
+        
+        if (error) console.error('Error clearing users:', error);
     }
 };

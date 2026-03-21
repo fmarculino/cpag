@@ -1,14 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle } from 'react';
 import { User, UserFormData, UserRole } from '../types';
 import { userService } from '../services/userService';
 import { UserPlus, Edit2, Trash2, Mail, Shield, X, Check, Save, User as UserIcon, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface UserManagementProps {
-    onClose: () => void;
+    onClose?: () => void;
 }
 
-const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
+export interface UserManagementRef {
+    handleOpenModal: () => void;
+}
+
+const UserManagement = React.forwardRef<UserManagementRef, UserManagementProps>(({ onClose }, ref) => {
     const [users, setUsers] = useState<User[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -103,6 +107,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
         setUserToDelete({ id, login });
     };
 
+    useImperativeHandle(ref, () => ({
+        handleOpenModal: () => handleOpenModal()
+    }));
+
     const confirmDelete = async () => {
         if (!userToDelete) return;
 
@@ -119,29 +127,8 @@ const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800">
-                <header className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
-                    <div>
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">Gestão de Usuários</h2>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm">Visualize e gerencie quem pode acessar o sistema.</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => handleOpenModal()}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-2xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
-                        >
-                            <UserPlus className="w-5 h-5" /> Novo Usuário
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl transition-all shadow-sm"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
-                </header>
-
+        <div className="w-full animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full shadow-2xl overflow-hidden flex flex-col border border-transparent dark:border-slate-800">
                 <main className="flex-1 overflow-y-auto p-8">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-64 gap-3">
@@ -253,12 +240,43 @@ const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
                                             <select
                                                 value={formData.role}
                                                 onChange={e => setFormData({ ...formData, role: e.target.value as UserRole })}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[length:1.25em_1.25em] bg-no-repeat"
                                                 disabled={editingUser?.login === 'admin'}
                                             >
                                                 <option value={UserRole.USER}>Usuário</option>
                                                 <option value={UserRole.ADMIN}>Administrador</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Permissions Preview */}
+                                    <div className="space-y-3 pt-2">
+                                        <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Permissões de Acesso</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50">
+                                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${formData.role === UserRole.ADMIN ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}`}>
+                                                    {formData.role === UserRole.ADMIN ? <Check className="w-3 h-3" strokeWidth={3} /> : <Shield className="w-3 h-3" />}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">Editar Contas</span>
+                                            </div>
+                                            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50">
+                                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${formData.role === UserRole.ADMIN ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}`}>
+                                                    {formData.role === UserRole.ADMIN ? <Check className="w-3 h-3" strokeWidth={3} /> : <Shield className="w-3 h-3" />}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">Excluir Dados</span>
+                                            </div>
+                                            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50">
+                                                <div className="w-5 h-5 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+                                                    <Check className="w-3 h-3" strokeWidth={3} />
+                                                </div>
+                                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">Dashboards</span>
+                                            </div>
+                                            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50">
+                                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${formData.role === UserRole.ADMIN ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}`}>
+                                                    {formData.role === UserRole.ADMIN ? <Check className="w-3 h-3" strokeWidth={3} /> : <Shield className="w-3 h-3" />}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">Gestão Usuários</span>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
@@ -390,6 +408,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ onClose }) => {
             )}
         </div>
     );
-};
+});
 
 export default UserManagement;

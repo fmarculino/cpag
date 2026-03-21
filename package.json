@@ -11,10 +11,12 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.95.3",
     "@types/bcryptjs": "^2.4.6",
+    "@types/jszip": "^3.4.0",
     "@vercel/analytics": "^1.6.1",
     "bcryptjs": "^3.0.3",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
