@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Environment Variables
+.env
+.env.local
+
+# Local test scripts
+test-supabase.mjs
+test-supabase2.mjs
