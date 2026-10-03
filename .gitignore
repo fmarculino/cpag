@@ -30,3 +30,7 @@ dist-ssr
 # Local test scripts
 test-supabase.mjs
 test-supabase2.mjs
+
+# python cache
+__pycache__/
+*.pyc
