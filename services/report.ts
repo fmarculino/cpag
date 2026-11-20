@@ -1,6 +1,6 @@
 
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Account, AccountStatus } from '../types';
 
 export const reportService = {
@@ -51,7 +51,7 @@ export const reportService = {
       acc.status
     ]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 55,
       head: [['Vencimento', 'Fornecedor', 'Título', 'Empresa', 'Valor', 'Status']],
       body: tableData,
@@ -78,7 +78,7 @@ export const reportService = {
     });
 
     // Rodapé
-    const pageCount = (doc as any).internal.getNumberOfPages();
+    const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);

@@ -1,12 +1,14 @@
-
 import React, { useState } from 'react';
-import { X, Upload, Info, AlertCircle } from 'lucide-react';
-import { Account, AccountStatus, AccountType, AccountCategory } from '../types';
+import { AlertCircle, Info, Upload, X } from 'lucide-react';
+import { Account, AccountCategory, AccountStatus, AccountType } from '../types';
 
 interface ImportModalProps {
-  onImport: (accounts: Account[]) => void;
+  onImport: (accounts: Account[]) => Promise<void> | void;
   onClose: () => void;
 }
+
+const MAX_IMPORT_SIZE = 5 * 1024 * 1024;
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
   const [file, setFile] = useState<File | null>(null);
@@ -15,52 +17,84 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selected = e.target.files[0];
+      if (selected.size > MAX_IMPORT_SIZE) {
+        setError('Arquivo excede o limite de 5MB.');
+        setFile(null);
+        return;
+      }
+      setFile(selected);
       setError(null);
     }
   };
 
   const parseDate = (dateStr: string): string => {
-    if (!dateStr) return new Date().toISOString().split('T')[0];
-    const parts = dateStr.trim().split('/');
+    const todayIso = new Date().toISOString().split('T')[0];
+    if (!dateStr) return todayIso;
+
+    const trimmed = dateStr.trim();
+    const parts = trimmed.split('/');
+    let candidate = trimmed;
+
     if (parts.length === 3) {
       const day = parts[0].padStart(2, '0');
       const month = parts[1].padStart(2, '0');
       const year = parts[2];
-      return `${year}-${month}-${day}`;
+      candidate = `${year}-${month}-${day}`;
     }
-    return dateStr;
+
+    if (!ISO_DATE_REGEX.test(candidate)) return todayIso;
+
+    const [y, m, d] = candidate.split('-').map(Number);
+    const parsed = new Date(Date.UTC(y, m - 1, d));
+    if (
+      parsed.getUTCFullYear() !== y ||
+      parsed.getUTCMonth() !== m - 1 ||
+      parsed.getUTCDate() !== d
+    ) {
+      return todayIso;
+    }
+
+    return candidate;
   };
 
   const parseCurrency = (valStr: string): number => {
     if (!valStr) return 0;
-    const cleanValue = valStr.replace('R$', '')
+    const cleanValue = valStr
+      .replace('R$', '')
       .replace(/\s/g, '')
       .replace(/\./g, '')
       .replace(',', '.');
-    return parseFloat(cleanValue) || 0;
+    const parsed = parseFloat(cleanValue);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
   };
 
   const processFile = () => {
     if (!file) return;
+    if (file.size > MAX_IMPORT_SIZE) {
+      setError('Arquivo excede o limite de 5MB.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
         const lines = text.split(/\r?\n/);
 
         if (lines.length < 2) {
-          throw new Error("Arquivo vazio ou sem dados.");
+          throw new Error('Arquivo vazio ou sem dados.');
         }
 
         const now = Date.now();
-        const imported: Account[] = lines.slice(1)
-          .filter(line => line.trim().length > 0 && line.includes(';'))
-          .map((line, index) => {
-            const values = line.split(';').map(v => v.trim());
+        const imported: Account[] = lines
+          .slice(1)
+          .filter((line) => line.trim().length > 0 && line.includes(';'))
+          .map((line) => {
+            const values = line.split(';').map((v) => v.trim());
 
             const tipoStr = (values[7] || '').toUpperCase();
             const statusStr = (values[8] || '').toUpperCase();
@@ -70,7 +104,7 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
             else if (statusStr.includes('CANCEL')) finalStatus = AccountStatus.CANCELADO;
 
             return {
-              id: `imp-${now}-${index}-${Math.random().toString(36).substr(2, 7)}`,
+              id: crypto.randomUUID(),
               dataMovimento: parseDate(values[0]),
               local: values[1] || '',
               fornecedor: values[2] || 'Não informado',
@@ -82,26 +116,25 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
               categoria: AccountCategory.OUTROS,
               status: finalStatus,
               observacao: values[9] || '',
-              createdAt: now
+              createdAt: now,
             };
           });
 
         if (imported.length === 0) {
-          throw new Error("Nenhum dado válido encontrado para importação.");
+          throw new Error('Nenhum dado válido encontrado para importação.');
         }
 
-        onImport(imported);
-        setLoading(false);
+        await onImport(imported);
         onClose();
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Erro ao processar o arquivo. Verifique o formato.");
+      } catch (err) {
+        setError((err as Error).message || 'Erro ao processar o arquivo. Verifique o formato.');
+      } finally {
         setLoading(false);
       }
     };
 
     reader.onerror = () => {
-      setError("Erro ao ler o arquivo.");
+      setError('Erro ao ler o arquivo.');
       setLoading(false);
     };
 
@@ -112,8 +145,14 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800">
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Importar Dados</h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition-colors">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+            Importar Dados
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition-colors"
+          >
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -125,47 +164,91 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
               <div>
                 <p className="font-bold mb-1">Formato suportado:</p>
                 <p className="opacity-80 leading-tight">
-                  Utilize o formato CSV delimitado por ponto e vírgula (;) seguindo a ordem exata das colunas abaixo:
+                  Utilize o formato CSV delimitado por ponto e vírgula (;) seguindo a ordem exata
+                  das colunas abaixo:
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 pt-3 border-t border-blue-100 dark:border-blue-800/50">
               <div className="flex flex-col">
-                <span className="font-semibold text-xs opacity-60 uppercase tracking-wider">Coluna / Formato</span>
-                <span className="mt-1">1. <b>Data Mov.</b>: DD/MM/AAAA</span>
-                <span>2. <b>Local</b>: texto</span>
-                <span>3. <b>Fornecedor</b>: texto</span>
-                <span>4. <b>Título</b>: texto</span>
-                <span>5. <b>Empresa</b>: texto</span>
+                <span className="font-semibold text-xs opacity-60 uppercase tracking-wider">
+                  Coluna / Formato
+                </span>
+                <span className="mt-1">
+                  1. <b>Data Mov.</b>: DD/MM/AAAA
+                </span>
+                <span>
+                  2. <b>Local</b>: texto
+                </span>
+                <span>
+                  3. <b>Fornecedor</b>: texto
+                </span>
+                <span>
+                  4. <b>Título</b>: texto
+                </span>
+                <span>
+                  5. <b>Empresa</b>: texto
+                </span>
               </div>
               <div className="flex flex-col">
-                <span className="font-semibold text-xs opacity-60 uppercase tracking-wider">&nbsp;</span>
-                <span className="mt-1">6. <b>Vencimento</b>: DD/MM/AAAA</span>
-                <span>7. <b>Valor</b>: R$ 0,00</span>
-                <span>8. <b>Tipo</b>: COMPRA / DESPESA</span>
-                <span>9. <b>Status</b>: PAGO / PENDENTE</span>
-                <span>10. <b>Obs.</b>: texto</span>
+                <span className="font-semibold text-xs opacity-60 uppercase tracking-wider">
+                  &nbsp;
+                </span>
+                <span className="mt-1">
+                  6. <b>Vencimento</b>: DD/MM/AAAA
+                </span>
+                <span>
+                  7. <b>Valor</b>: R$ 0,00
+                </span>
+                <span>
+                  8. <b>Tipo</b>: COMPRA / DESPESA
+                </span>
+                <span>
+                  9. <b>Status</b>: PAGO / PENDENTE
+                </span>
+                <span>
+                  10. <b>Obs.</b>: texto
+                </span>
               </div>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 p-4 rounded-2xl flex gap-3 text-red-700 text-sm border border-red-100 animate-in fade-in slide-in-from-top-1">
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl flex gap-3 text-red-700 dark:text-red-300 text-sm border border-red-100 dark:border-red-800 animate-in fade-in slide-in-from-top-1">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
-          <label className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all group ${file ? 'border-blue-400 bg-blue-50/30 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/5'}`}>
-            <input type="file" accept=".csv,.txt" className="hidden" onChange={handleFileChange} />
-            <div className={`p-4 rounded-full transition-transform mb-4 ${file ? 'bg-blue-600 text-white' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 group-hover:scale-110'}`}>
+          <label
+            className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all group ${
+              file
+                ? 'border-blue-400 bg-blue-50/30 dark:bg-blue-900/10'
+                : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/5'
+            }`}
+          >
+            <input
+              type="file"
+              accept=".csv,.txt"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <div
+              className={`p-4 rounded-full transition-transform mb-4 ${
+                file
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 group-hover:scale-110'
+              }`}
+            >
               <Upload className="w-8 h-8" />
             </div>
             <span className="font-bold text-slate-700 dark:text-slate-200 text-center">
               {file ? file.name : 'Selecionar Arquivo CSV'}
             </span>
-            <span className="text-sm text-slate-400 dark:text-slate-500 mt-1">Clique para buscar ou arraste o arquivo</span>
+            <span className="text-sm text-slate-400 dark:text-slate-500 mt-1">
+              Clique para buscar ou arraste o arquivo (máx. 5MB)
+            </span>
           </label>
 
           <div className="flex gap-3">
@@ -187,7 +270,9 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Processando...
                 </>
-              ) : 'Iniciar Importação'}
+              ) : (
+                'Iniciar Importação'
+              )}
             </button>
           </div>
         </div>

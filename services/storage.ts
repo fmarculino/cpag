@@ -1,131 +1,138 @@
-
-import { Account } from '../types';
+import { Account, AccountCategory, AccountStatus, AccountType, Attachment } from '../types';
 import { supabase } from './supabase';
+
+const ACCOUNT_COLUMNS =
+  'id, data_movimento, local, fornecedor, titulo, empresa, vencimento, valor, tipo, categoria, status, observacao, created_at, anexos';
+
+interface AccountRow {
+  id: string;
+  data_movimento: string;
+  local: string | null;
+  fornecedor: string;
+  titulo: string | null;
+  empresa: string | null;
+  vencimento: string;
+  valor: number | string;
+  tipo: string;
+  categoria: string;
+  status: string;
+  observacao: string | null;
+  created_at: string | number;
+  anexos: Attachment[] | null;
+}
+
+function sanitizeAttachments(anexos?: Attachment[]): Omit<Attachment, 'url'>[] {
+  if (!Array.isArray(anexos)) return [];
+  return anexos.map(({ name, path, size, type }) => ({
+    name,
+    path,
+    size,
+    type,
+  }));
+}
+
+function mapAccountRow(item: AccountRow): Account {
+  const createdMs =
+    typeof item.created_at === 'number'
+      ? item.created_at
+      : new Date(item.created_at).getTime();
+
+  return {
+    id: item.id,
+    dataMovimento: item.data_movimento,
+    local: item.local || '',
+    fornecedor: item.fornecedor,
+    titulo: item.titulo || '',
+    empresa: item.empresa || '',
+    vencimento: item.vencimento,
+    valor: Number(item.valor),
+    tipo: item.tipo as AccountType,
+    categoria: item.categoria as AccountCategory,
+    status: item.status as AccountStatus,
+    observacao: item.observacao || '',
+    createdAt: Number.isFinite(createdMs) ? createdMs : Date.now(),
+    anexos: sanitizeAttachments(item.anexos ?? []),
+  };
+}
+
+function mapAccountToDb(account: Account) {
+  return {
+    id: account.id,
+    data_movimento: account.dataMovimento,
+    local: account.local,
+    fornecedor: account.fornecedor,
+    titulo: account.titulo,
+    empresa: account.empresa,
+    vencimento: account.vencimento,
+    valor: account.valor,
+    tipo: account.tipo,
+    categoria: account.categoria,
+    status: account.status,
+    observacao: account.observacao,
+    created_at: new Date(account.createdAt || Date.now()).toISOString(),
+    anexos: sanitizeAttachments(account.anexos),
+  };
+}
 
 export const storageService = {
   getAccounts: async (): Promise<Account[]> => {
-    let allData: any[] = [];
+    const pageSize = 1000;
+    let allData: AccountRow[] = [];
     let from = 0;
-    let to = 999;
     let hasMore = true;
 
     while (hasMore) {
+      const to = from + pageSize - 1;
       const { data, error } = await supabase
         .from('accounts')
-        .select('*')
+        .select(ACCOUNT_COLUMNS)
         .range(from, to)
         .order('vencimento', { ascending: true });
 
       if (error) {
-        console.error('Error fetching accounts:', error);
-        break;
+        throw new Error(`Erro ao carregar contas: ${error.message}`);
       }
 
       if (data && data.length > 0) {
-        allData = [...allData, ...data];
-        if (data.length < 1000) {
+        allData = [...allData, ...(data as AccountRow[])];
+        if (data.length < pageSize) {
           hasMore = false;
         } else {
-          from += 1000;
-          to += 1000;
+          from += pageSize;
         }
       } else {
         hasMore = false;
       }
     }
 
-    return allData.map(item => ({
-      id: item.id,
-      dataMovimento: item.data_movimento,
-      local: item.local,
-      fornecedor: item.fornecedor,
-      titulo: item.titulo,
-      empresa: item.empresa,
-      vencimento: item.vencimento,
-      valor: Number(item.valor),
-      tipo: item.tipo,
-      categoria: item.categoria,
-      status: item.status,
-      observacao: item.observacao,
-      createdAt: item.created_at,
-      anexos: item.anexos || []
-    }));
+    return allData.map(mapAccountRow);
   },
 
   saveAccounts: async (accounts: Account[]): Promise<void> => {
-    // This method might not be as useful in a real DB as before 
-    // unless it's a bulk sync, but I'll keep it for compatibility
-    // and implement as an upsert.
-    const dbItems = accounts.map(a => ({
-      id: a.id,
-      data_movimento: a.dataMovimento,
-      local: a.local,
-      fornecedor: a.fornecedor,
-      titulo: a.titulo,
-      empresa: a.empresa,
-      vencimento: a.vencimento,
-      valor: a.valor,
-      tipo: a.tipo,
-      categoria: a.categoria,
-      status: a.status,
-      observacao: a.observacao,
-      created_at: a.createdAt,
-      anexos: a.anexos
-    }));
+    if (accounts.length === 0) return;
 
-    const { error } = await supabase
-      .from('accounts')
-      .upsert(dbItems);
-
-    if (error) console.error('Error saving accounts:', error);
+    const dbItems = accounts.map(mapAccountToDb);
+    const { error } = await supabase.from('accounts').upsert(dbItems);
+    if (error) {
+      throw new Error(`Erro ao salvar contas: ${error.message}`);
+    }
   },
 
   addAccount: async (account: Account): Promise<void> => {
-    const { error } = await supabase
-      .from('accounts')
-      .insert([{
-        id: account.id,
-        data_movimento: account.dataMovimento,
-        local: account.local,
-        fornecedor: account.fornecedor,
-        titulo: account.titulo,
-        empresa: account.empresa,
-        vencimento: account.vencimento,
-        valor: account.valor,
-        tipo: account.tipo,
-        categoria: account.categoria,
-        status: account.status,
-        observacao: account.observacao,
-        created_at: account.createdAt,
-        anexos: account.anexos
-      }]);
-
-    if (error) console.error('Error adding account:', error);
+    const { error } = await supabase.from('accounts').insert([mapAccountToDb(account)]);
+    if (error) {
+      throw new Error(`Erro ao criar conta: ${error.message}`);
+    }
   },
 
   addAccounts: async (accounts: Account[]): Promise<void> => {
-    const dbItems = accounts.map(account => ({
-      id: account.id,
-      data_movimento: account.dataMovimento,
-      local: account.local,
-      fornecedor: account.fornecedor,
-      titulo: account.titulo,
-      empresa: account.empresa,
-      vencimento: account.vencimento,
-      valor: account.valor,
-      tipo: account.tipo,
-      categoria: account.categoria,
-      status: account.status,
-      observacao: account.observacao,
-      created_at: account.createdAt,
-      anexos: account.anexos
-    }));
+    if (accounts.length === 0) return;
 
-    const { error } = await supabase
-      .from('accounts')
-      .insert(dbItems);
-
-    if (error) console.error('Error adding accounts in bulk:', error);
+    const dbItems = accounts.map(mapAccountToDb);
+    const { error } = await supabase.from('accounts').insert(dbItems);
+    if (error) {
+      throw new Error(`Erro ao importar contas em lote: ${error.message}`);
+    }
   },
 
   updateAccount: async (updatedAccount: Account): Promise<void> => {
@@ -143,37 +150,45 @@ export const storageService = {
         categoria: updatedAccount.categoria,
         status: updatedAccount.status,
         observacao: updatedAccount.observacao,
-        anexos: updatedAccount.anexos,
+        anexos: sanitizeAttachments(updatedAccount.anexos),
       })
       .eq('id', updatedAccount.id);
 
-    if (error) console.error('Error updating account:', error);
+    if (error) {
+      throw new Error(`Erro ao atualizar conta: ${error.message}`);
+    }
   },
 
   deleteAccounts: async (ids: string[]): Promise<void> => {
-    const { error } = await supabase
-      .from('accounts')
-      .delete()
-      .in('id', ids);
+    if (ids.length === 0) return;
 
-    if (error) console.error('Error deleting accounts:', error);
+    const { error } = await supabase.from('accounts').delete().in('id', ids);
+    if (error) {
+      throw new Error(`Erro ao excluir contas: ${error.message}`);
+    }
   },
 
-  updateStatusBulk: async (ids: string[], status: any): Promise<void> => {
-    const { error } = await supabase
-      .from('accounts')
-      .update({ status })
-      .in('id', ids);
+  updateStatusBulk: async (ids: string[], status: AccountStatus): Promise<void> => {
+    if (ids.length === 0) return;
 
-    if (error) console.error('Error updating status:', error);
+    const { error } = await supabase.from('accounts').update({ status }).in('id', ids);
+    if (error) {
+      throw new Error(`Erro ao atualizar status das contas: ${error.message}`);
+    }
   },
 
-  renameValue: async (column: 'tipo' | 'categoria' | 'status', oldValue: string, newValue: string): Promise<void> => {
+  renameValue: async (
+    column: 'tipo' | 'categoria' | 'status',
+    oldValue: string,
+    newValue: string
+  ): Promise<void> => {
     const { error } = await supabase
       .from('accounts')
       .update({ [column]: newValue })
       .eq(column, oldValue);
 
-    if (error) console.error(`Error renaming ${column} from ${oldValue} to ${newValue}:`, error);
-  }
+    if (error) {
+      throw new Error(`Erro ao renomear ${column}: ${error.message}`);
+    }
+  },
 };

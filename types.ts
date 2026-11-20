@@ -1,4 +1,3 @@
-
 export enum AccountStatus {
   PENDENTE = 'PENDENTE',
   PAGO = 'PAGO',
@@ -17,7 +16,6 @@ export interface User {
   login: string;
   fullName: string;
   email: string;
-  password?: string; // Optinal because we don't want to send it to the client usually
   role: UserRole;
   preferredTheme: Theme;
   createdAt: number;
@@ -44,10 +42,10 @@ export enum AccountCategory {
 
 export interface Attachment {
   name: string;
-  url: string;
+  path: string;
   size: number;
   type: string;
-  path: string;
+  url?: string;
 }
 
 export interface Account {
